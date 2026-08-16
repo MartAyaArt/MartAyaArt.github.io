@@ -192,7 +192,7 @@ button{
             id="pA"
             type="number"
             min="1"
-            max="100"
+            max="200"
             step="any"
             placeholder="1 - 100"
         >
@@ -253,7 +253,7 @@ button{
             id="zB"
             type="number"
             min="0"
-            max="100"
+            max="200"
             step="any"
             placeholder="Example: 75"
         >
@@ -319,7 +319,7 @@ function sectionA(){
     if(!Number.isFinite(p) || p < 1 || p > 100){
 
         out.textContent =
-            "Please enter a Found Power value between 1% and 100%.";
+            "Please enter a Found Power value between 1% and 200%.";
 
         return;
     }
@@ -362,7 +362,7 @@ function sectionB(){
     if(!Number.isFinite(z) || z < 0 || z > 100){
 
         out.textContent =
-            "Please enter a Stored Machine Power value between 0% and 100%.";
+            "Please enter a Stored Machine Power value between 0% and 200%.";
 
         return;
     }
