@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator X ÷ 3.4</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f2f4f7;
+    margin:0;
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    color:#1f2937
+}
+
+.card{
+    width:min(90vw,380px);
+    background:white;
+    padding:28px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,12)
+}
+
+h1{
+    text-align:center;
+    font-size:1.5rem;
+    margin-top:0
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold
+}
+
+input{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    font-size:1.1rem;
+    border:1px solid #cbd5e1;
+    border-radius:10px
+}
+
+.buttons{
+    display:flex;
+    gap:10px;
+    margin-top:16px
+}
+
+button{
+    flex:1;
+    padding:12px;
+    border:0;
+    border-radius:10px;
+    font-size:1rem;
+    cursor:pointer
+}
+
+#calculate{
+    background:#2563eb;
+    color:white
+}
+
+#clear{
+    background:#e5e7eb;
+    color:#111827
+}
+
+#result{
+    margin-top:20px;
+    padding:14px;
+    min-height:24px;
+    border-radius:10px;
+    background:#eef2ff;
+    font-size:1.15rem;
+    text-align:center;
+    font-weight:bold
+}
+</style>
+</head>
+
+<body>
+
+<main class="card">
+
+<h1>Calculator X ÷ 3.4</h1>
+
+<label for="xValue">Enter value X</label>
+
+<input
+    id="xValue"
+    type="text"
+    inputmode="decimal"
+    placeholder="Example: 34"
+>
+
+<div class="buttons">
+
+<button id="calculate" type="button">
+    Calculate
+</button>
+
+<button id="clear" type="button">
+    Clear
+</button>
+
+</div>
+
+<div id="result">
+    Result will appear here
+</div>
+
+</main>
+
+<script>
+
+const input=document.getElementById("xValue");
+const result=document.getElementById("result");
+
+function calculate(){
+
+    const normalized=input.value.trim().replace(",",".");
+    const x=Number(normalized);
+
+    if(!normalized || !Number.isFinite(x)){
+        result.textContent="Please enter a valid number.";
+        return;
+    }
+
+    const answer=x/3.4;
+
+    result.textContent=
+        `${x} ÷ 3.4 = ${answer.toLocaleString(
+            undefined,
+            {maximumFractionDigits:8}
+        )}`;
+}
+
+document
+    .getElementById("calculate")
+    .addEventListener("click",calculate);
+
+input.addEventListener("keydown",e=>{
+    if(e.key==="Enter")calculate();
+});
+
+document
+    .getElementById("clear")
+    .addEventListener("click",()=>{
+
+        input.value="";
+        result.textContent="Result will appear here";
+        input.focus();
+
+    });
+
+</script>
+
+</body>
+</html>
