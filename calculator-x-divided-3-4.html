@@ -4,238 +4,405 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Exposure Calculator</title>
+<title>Power Conversion Calculator</title>
 
 <style>
+*{
+    box-sizing:border-box;
+}
+
 body{
-    font-family:Arial,sans-serif;
+    font-family:Arial,Helvetica,sans-serif;
     background:#f2f4f7;
     margin:0;
-    min-height:100vh;
-    display:grid;
-    place-items:center;
+    padding:24px;
     color:#1f2937;
 }
 
+.container{
+    width:min(94vw,600px);
+    margin:auto;
+}
+
+.header-card,
 .card{
-    width:min(90vw,420px);
-    background:white;
+    background:#fff;
     padding:28px;
     border-radius:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+    margin-bottom:22px;
 }
 
 h1{
     text-align:center;
-    font-size:1.5rem;
-    margin-top:0;
-    margin-bottom:22px;
+    font-size:1.7rem;
+    margin:0 0 10px;
 }
 
-.mode{
-    margin-bottom:22px;
-    padding-bottom:22px;
-    border-bottom:1px solid #e5e7eb;
-}
-
-.mode:last-of-type{
-    border-bottom:none;
+.subtitle{
+    text-align:center;
+    color:#64748b;
+    margin:0;
+    line-height:1.5;
 }
 
 h2{
-    font-size:1.1rem;
-    margin-bottom:12px;
+    font-size:1.2rem;
+    margin:0 0 8px;
+}
+
+.description{
+    color:#64748b;
+    margin:0 0 18px;
+    line-height:1.5;
+}
+
+.formula{
+    background:#f8fafc;
+    padding:11px 12px;
+    border-radius:10px;
+    text-align:center;
+    margin:12px 0;
+    color:#475569;
+    font-weight:700;
 }
 
 label{
     display:block;
-    margin-bottom:8px;
-    font-weight:bold;
+    margin:14px 0 6px;
+    font-weight:700;
 }
 
 input{
     width:100%;
-    box-sizing:border-box;
     padding:12px;
-    font-size:1.1rem;
+    font-size:1.05rem;
     border:1px solid #cbd5e1;
     border-radius:10px;
 }
 
+.buttons{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+}
+
 button{
-    width:100%;
-    margin-top:14px;
+    flex:1;
     padding:12px;
     border:0;
     border-radius:10px;
     font-size:1rem;
     cursor:pointer;
-    background:#2563eb;
-    color:white;
 }
 
-button:hover{
+.calculate{
+    background:#2563eb;
+    color:#fff;
+}
+
+.calculate:hover{
     background:#1d4ed8;
 }
 
-.result{
-    margin-top:14px;
-    padding:14px;
-    min-height:24px;
-    border-radius:10px;
-    background:#eef2ff;
-    font-size:1.1rem;
-    text-align:center;
-    font-weight:bold;
+.clear{
+    background:#e5e7eb;
+    color:#111827;
 }
 
-.formula{
+.clear:hover{
+    background:#d1d5db;
+}
+
+.result{
+    margin-top:16px;
+    padding:16px;
+    background:#eef2ff;
+    border-radius:10px;
     text-align:center;
+    font-weight:700;
+    line-height:1.7;
+    min-height:56px;
+}
+
+.footer-note{
+    text-align:center;
+    font-size:.9rem;
     color:#64748b;
-    font-size:0.95rem;
-    margin-bottom:12px;
+    margin-top:6px;
+}
+
+@media (max-width:500px){
+    body{
+        padding:14px;
+    }
+
+    .header-card,
+    .card{
+        padding:22px;
+    }
+
+    .buttons{
+        flex-direction:column;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<main class="card">
+<div class="container">
 
-<h1>Exposure Calculator</h1>
+    <div class="header-card">
+        <h1>Power Conversion Calculator</h1>
 
-<section class="mode">
-
-    <h2>Calculate Energy</h2>
-
-    <div class="formula">
-        Y = 3400 ÷ X
+        <p class="subtitle">
+            Calculate the conversion factor between a measured power value
+            and the power percentage stored in the machine.
+        </p>
     </div>
 
-    <label for="inputX">Enter X</label>
 
-    <input
-        id="inputX"
-        type="text"
-        inputmode="decimal"
-        placeholder="Example: 20"
-    >
+    <div class="card">
 
-    <button id="calculateY" type="button">
-        Calculate Energy
-    </button>
+        <h2>Section A — Calculate Stored Machine Power</h2>
 
-    <div id="resultY" class="result">
-        Result will appear here
+        <p class="description">
+            Use this section when you know the found power percentage
+            and want to calculate the power percentage that must be stored
+            in the machine.
+        </p>
+
+        <div class="formula">
+            Y = 3400 / X
+        </div>
+
+        <label for="xA">Enter X</label>
+
+        <input
+            id="xA"
+            type="number"
+            step="any"
+            placeholder="Example: 3600"
+        >
+
+        <label for="pA">Found Power (%P)</label>
+
+        <input
+            id="pA"
+            type="number"
+            min="1"
+            max="100"
+            step="any"
+            placeholder="1 - 100"
+        >
+
+        <div class="formula">
+            Z = %P × Y
+        </div>
+
+        <div class="buttons">
+
+            <button
+                class="calculate"
+                onclick="sectionA()">
+                Calculate
+            </button>
+
+            <button
+                class="clear"
+                onclick="clearA()">
+                Clear
+            </button>
+
+        </div>
+
+        <div class="result" id="resultA">
+            Conversion factor and stored power will appear here.
+        </div>
+
     </div>
 
-</section>
 
+    <div class="card">
 
-<section class="mode">
+        <h2>Section B — Recover Found Power</h2>
 
-    <h2>Calculate X</h2>
+        <p class="description">
+            Use this section when you know the power percentage stored
+            in the machine and want to recover the corresponding found
+            power percentage.
+        </p>
 
-    <div class="formula">
-        X = 3400 ÷ Y
+        <div class="formula">
+            Y = 3400 / X
+        </div>
+
+        <label for="xB">Enter X</label>
+
+        <input
+            id="xB"
+            type="number"
+            step="any"
+            placeholder="Example: 3600"
+        >
+
+        <label for="zB">Stored Machine Power (Z %)</label>
+
+        <input
+            id="zB"
+            type="number"
+            min="0"
+            max="100"
+            step="any"
+            placeholder="Example: 75"
+        >
+
+        <div class="formula">
+            %P = Z / Y
+        </div>
+
+        <div class="buttons">
+
+            <button
+                class="calculate"
+                onclick="sectionB()">
+                Calculate
+            </button>
+
+            <button
+                class="clear"
+                onclick="clearB()">
+                Clear
+            </button>
+
+        </div>
+
+        <div class="result" id="resultB">
+            Conversion factor and found power will appear here.
+        </div>
+
     </div>
 
-    <label for="inputY">
-        Enter desired energy (mJ/cm²)
-    </label>
+    <p class="footer-note">
+        Section A and Section B operate independently.
+    </p>
 
-    <input
-        id="inputY"
-        type="text"
-        inputmode="decimal"
-        placeholder="Example: 170"
-    >
-
-    <button id="calculateX" type="button">
-        Calculate X
-    </button>
-
-    <div id="resultX" class="result">
-        Result will appear here
-    </div>
-
-</section>
-
-</main>
+</div>
 
 
 <script>
 
-function readNumber(value){
-    const normalized = value.trim().replace(",", ".");
-    const number = Number(normalized);
+function sectionA(){
 
-    if(!normalized || !Number.isFinite(number)){
-        return null;
+    const x = Number(
+        document.getElementById("xA").value
+    );
+
+    const p = Number(
+        document.getElementById("pA").value
+    );
+
+    const out =
+        document.getElementById("resultA");
+
+
+    if(!Number.isFinite(x) || x <= 0){
+
+        out.textContent =
+            "Please enter a valid X value greater than 0.";
+
+        return;
     }
 
-    return number;
+
+    if(!Number.isFinite(p) || p < 1 || p > 100){
+
+        out.textContent =
+            "Please enter a Found Power value between 1% and 100%.";
+
+        return;
+    }
+
+
+    const y = 3400 / x;
+
+    const z = p * y;
+
+
+    out.innerHTML =
+        `Conversion Factor (Y): ${y.toFixed(5)}<br>` +
+        `Stored Machine Power (Z): ${z.toFixed(2)}%`;
 }
 
 
-document
-    .getElementById("calculateY")
-    .addEventListener("click", () => {
+function sectionB(){
 
-        const x = readNumber(
-            document.getElementById("inputX").value
-        );
+    const x = Number(
+        document.getElementById("xB").value
+    );
 
-        const result = document.getElementById("resultY");
+    const z = Number(
+        document.getElementById("zB").value
+    );
 
-        if(x === null){
-            result.textContent = "Please enter a valid number.";
-            return;
-        }
-
-        if(x === 0){
-            result.textContent = "X cannot be zero.";
-            return;
-        }
-
-        const y = 3400 / x;
-
-        result.textContent =
-            `${y.toLocaleString(
-                undefined,
-                {maximumFractionDigits:8}
-            )} mJ/cm²`;
-    });
+    const out =
+        document.getElementById("resultB");
 
 
-document
-    .getElementById("calculateX")
-    .addEventListener("click", () => {
+    if(!Number.isFinite(x) || x <= 0){
 
-        const y = readNumber(
-            document.getElementById("inputY").value
-        );
+        out.textContent =
+            "Please enter a valid X value greater than 0.";
 
-        const result = document.getElementById("resultX");
+        return;
+    }
 
-        if(y === null){
-            result.textContent = "Please enter a valid number.";
-            return;
-        }
 
-        if(y === 0){
-            result.textContent = "Energy cannot be zero.";
-            return;
-        }
+    if(!Number.isFinite(z) || z < 0 || z > 100){
 
-        const x = 3400 / y;
+        out.textContent =
+            "Please enter a Stored Machine Power value between 0% and 100%.";
 
-        result.textContent =
-            x.toLocaleString(
-                undefined,
-                {maximumFractionDigits:8}
-            );
-    });
+        return;
+    }
+
+
+    const y = 3400 / x;
+
+    const p = z / y;
+
+
+    out.innerHTML =
+        `Conversion Factor (Y): ${y.toFixed(5)}<br>` +
+        `Found Power (%P): ${p.toFixed(2)}%`;
+}
+
+
+function clearA(){
+
+    document.getElementById("xA").value = "";
+
+    document.getElementById("pA").value = "";
+
+    document.getElementById("resultA").textContent =
+        "Conversion factor and stored power will appear here.";
+
+    document.getElementById("xA").focus();
+}
+
+
+function clearB(){
+
+    document.getElementById("xB").value = "";
+
+    document.getElementById("zB").value = "";
+
+    document.getElementById("resultB").textContent =
+        "Conversion factor and found power will appear here.";
+
+    document.getElementById("xB").focus();
+}
 
 </script>
 
