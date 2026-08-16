@@ -109,7 +109,7 @@ button:hover{
     <h2>Calculate Energy</h2>
 
     <div class="formula">
-        Y = 3600 ÷ X
+        Y = 3400 ÷ X
     </div>
 
     <label for="inputX">Enter X</label>
@@ -137,7 +137,7 @@ button:hover{
     <h2>Calculate X</h2>
 
     <div class="formula">
-        X = 3600 ÷ Y
+        X = 3400 ÷ Y
     </div>
 
     <label for="inputY">
@@ -148,7 +148,7 @@ button:hover{
         id="inputY"
         type="text"
         inputmode="decimal"
-        placeholder="Example: 180"
+        placeholder="Example: 170"
     >
 
     <button id="calculateX" type="button">
@@ -198,7 +198,7 @@ document
             return;
         }
 
-        const y = 3600 / x;
+        const y = 3400 / x;
 
         result.textContent =
             `${y.toLocaleString(
@@ -228,7 +228,7 @@ document
             return;
         }
 
-        const x = 3600 / y;
+        const x = 3400 / y;
 
         result.textContent =
             x.toLocaleString(
