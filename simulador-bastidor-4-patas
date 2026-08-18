@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Simulador de Bastidor 4 Patas - Móvil</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--text:#e6edf3;--muted:#8b949e;--line:#30363d;--accent:#58a6ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+#app{display:grid;grid-template-columns:360px 1fr;min-height:100vh}
+aside{background:var(--panel);padding:16px;border-right:1px solid var(--line);overflow:auto}
+h1{font-size:19px;margin:0 0 5px}.sub{font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:12px}
+.sec{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.sec h2{font-size:13px;margin:0 0 10px}
+.leg{margin:12px 0}.top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.ctrl{display:grid;grid-template-columns:1fr 82px;gap:8px;align-items:center}
+input[type=range]{width:100%;height:34px;accent-color:var(--accent);touch-action:none}
+input[type=number]{width:100%;padding:8px;background:#0d1117;color:#fff;border:1px solid var(--line);border-radius:8px}
+.metrics{font-size:12px}.m{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #2a3038}.m:last-child{border:0}
+button{padding:10px;border:1px solid var(--line);border-radius:8px;background:#21262d;color:#fff}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+main{position:relative;min-height:100vh;overflow:hidden}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+.hint{position:absolute;left:10px;top:10px;font-size:11px;background:#0d1117cc;border:1px solid var(--line);padding:7px 9px;border-radius:8px;color:#c9d1d9}
+#status{color:#3fb950;font-weight:700}
+@media(max-width:800px){
+  #app{grid-template-columns:1fr}
+  aside{border-right:0;border-bottom:1px solid var(--line)}
+  main{height:58vh;min-height:420px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<aside>
+<h1>Simulador 3D de bastidor</h1>
+<div class="sub">Versión autónoma para móvil. No requiere internet ni librerías externas.<br><span id="status">● Simulación activa</span></div>
+
+<div class="sec">
+<h2>Altura de patas</h2>
+<div class="leg"><div class="top"><span>A · frontal izquierda</span><b id="va">0.0 mm</b></div><div class="ctrl"><input id="a" type="range" min="0" max="100" step=".5" value="0"><input id="an" type="number" min="0" max="100" step=".5" value="0"></div></div>
+<div class="leg"><div class="top"><span>B · frontal derecha</span><b id="vb">0.0 mm</b></div><div class="ctrl"><input id="b" type="range" min="0" max="100" step=".5" value="0"><input id="bn" type="number" min="0" max="100" step=".5" value="0"></div></div>
+<div class="leg"><div class="top"><span>C · trasera derecha</span><b id="vc">0.0 mm</b></div><div class="ctrl"><input id="c" type="range" min="0" max="100" step=".5" value="0"><input id="cn" type="number" min="0" max="100" step=".5" value="0"></div></div>
+<div class="leg"><div class="top"><span>D · trasera izquierda</span><b id="vd">0.0 mm</b></div><div class="ctrl"><input id="d" type="range" min="0" max="100" step=".5" value="0"><input id="dn" type="number" min="0" max="100" step=".5" value="0"></div></div>
+</div>
+
+<div class="sec metrics">
+<h2>Indicadores</h2>
+<div class="m"><span>Desnivel máximo</span><b id="range">0.0 mm</b></div>
+<div class="m"><span>Torsión diagonal Δ</span><b id="twist">0.0 mm</b></div>
+</div>
+
+<div class="sec">
+<div class="buttons">
+<button id="demo">Ejemplo torsión</button>
+<button id="zero">Patas a cero</button>
+</div>
+</div>
+</aside>
+
+<main id="view">
+<canvas id="cv"></canvas>
+<div class="hint">Arrastra sobre el dibujo para girarlo</div>
+</main>
+</div>
+
+<script>
+(function(){
+const ids=['a','b','c','d'];
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d');
+let yaw=-0.65,pitch=0.45,drag=false,lastX=0,lastY=0;
+
+function heights(){return ids.map(id=>parseFloat($(id).value)||0)}
+
+function size(){
+ const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);
+ cv.width=Math.max(1,Math.round(r.width*d));cv.height=Math.max(1,Math.round(r.height*d));
+ ctx.setTransform(d,0,0,d,0,0); draw();
+}
+function rot(p){
+ let [x,y,z]=p;
+ let cy=Math.cos(yaw),sy=Math.sin(yaw);
+ let x1=x*cy-z*sy,z1=x*sy+z*cy;
+ let cp=Math.cos(pitch),sp=Math.sin(pitch);
+ let y1=y*cp-z1*sp,z2=y*sp+z1*cp;
+ return [x1,y1,z2];
+}
+function project(p,w,h){
+ let [x,y,z]=rot(p), cam=1000, f=cam/(cam+z+900);
+ return [w/2+x*f,h*0.58-y*f,f];
+}
+function line(a,b,col,width=3){
+ ctx.strokeStyle=col;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+}
+function poly(points,fill,stroke){
+ ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);ctx.closePath();
+ ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();
+}
+function dot(p,label,col){
+ ctx.fillStyle=col;ctx.beginPath();ctx.arc(p[0],p[1],15,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#fff';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,p[0],p[1]+.5);
+}
+function draw(){
+ const r=cv.getBoundingClientRect(),w=r.width,h=r.height;
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#0d1117';ctx.fillRect(0,0,w,h);
+ const H=heights(),scale=3.2;
+ const X=420,Y=300,Z=260;
+ const P=[
+ [-X/2,H[0]*scale,-Y/2],[X/2,H[1]*scale,-Y/2],[X/2,H[2]*scale,Y/2],[-X/2,H[3]*scale,Y/2],
+ [-X/2,H[0]*scale+Z,-Y/2],[X/2,H[1]*scale+Z,-Y/2],[X/2,H[2]*scale+Z,Y/2],[-X/2,H[3]*scale+Z,Y/2]
+ ];
+ const Q=P.map(p=>project(p,w,h));
+ // ground
+ ctx.strokeStyle='#222b36';ctx.lineWidth=1;
+ for(let i=-5;i<=5;i++){let a=project([i*100,0,-600],w,h),b=project([i*100,0,600],w,h);line(a,b,'#222b36',1)}
+ for(let i=-5;i<=5;i++){let a=project([-600,0,i*100],w,h),b=project([600,0,i*100],w,h);line(a,b,'#222b36',1)}
+ // translucent faces
+ poly([Q[4],Q[5],Q[6],Q[7]],'rgba(88,166,255,.10)','rgba(88,166,255,.25)');
+ poly([Q[0],Q[1],Q[5],Q[4]],'rgba(88,166,255,.06)','rgba(88,166,255,.18)');
+ poly([Q[1],Q[2],Q[6],Q[5]],'rgba(88,166,255,.05)','rgba(88,166,255,.16)');
+ // legs to ground
+ const cols=['#58a6ff','#d29922','#f85149','#a371f7'];
+ for(let i=0;i<4;i++){
+   let g=project([P[i][0],0,P[i][2]],w,h); line(g,Q[i],cols[i],6); dot(Q[i],ids[i].toUpperCase(),cols[i]);
+ }
+ const edges=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+ edges.forEach(e=>line(Q[e[0]],Q[e[1]],'#c9d1d9',3));
+}
+function update(){
+ const H=heights();
+ ids.forEach((id,i)=>{$('v'+id).textContent=H[i].toFixed(1)+' mm';$(id+'n').value=H[i]});
+ $('range').textContent=(Math.max(...H)-Math.min(...H)).toFixed(1)+' mm';
+ $('twist').textContent=Math.abs(H[0]+H[2]-H[1]-H[3]).toFixed(1)+' mm';
+ draw();
+}
+ids.forEach(id=>{
+ $(id).addEventListener('input',update);
+ $(id+'n').addEventListener('input',()=>{
+   let v=parseFloat($(id+'n').value); if(!Number.isFinite(v))v=0; v=Math.max(0,Math.min(100,v));
+   $(id).value=v; update();
+ });
+});
+$('demo').onclick=()=>{let v=[0,25,5,40];ids.forEach((id,i)=>$(id).value=v[i]);update()};
+$('zero').onclick=()=>{ids.forEach(id=>$(id).value=0);update()};
+
+function start(x,y){drag=true;lastX=x;lastY=y}
+function move(x,y){if(!drag)return;yaw+=(x-lastX)*.01;pitch+=(y-lastY)*.008;pitch=Math.max(-1.1,Math.min(1.1,pitch));lastX=x;lastY=y;draw()}
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);start(e.clientX,e.clientY)});
+cv.addEventListener('pointermove',e=>move(e.clientX,e.clientY));
+cv.addEventListener('pointerup',()=>drag=false);
+cv.addEventListener('pointercancel',()=>drag=false);
+window.addEventListener('resize',size);
+size();update();
+})();
+</script>
+</body>
+</html>
